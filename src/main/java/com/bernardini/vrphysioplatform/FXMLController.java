@@ -8,10 +8,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.ResourceBundle;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -26,6 +29,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -41,7 +45,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import plux.newdriver.bioplux.*;
+import plux.newdriver.bioplux.BPException;
+import plux.newdriver.bioplux.Device;
 
 /**
  *
@@ -110,6 +115,7 @@ public class FXMLController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        
 //                try
 //     {
 //        // decomment next block to search for bioPlux devices
@@ -219,69 +225,7 @@ public class FXMLController implements Initializable {
             open2.disableProperty().set(false);
             
             markerRadius = (int)(slider.getHeight()/2);
-            mediaPlayer1.setOnReady(new Runnable() {
-                @Override
-                public void run() {
-                    
-                    
-                    
-//                    slider1.maxProperty().bind(Bindings.createDoubleBinding(
-//                        () -> mediaPlayer1.getTotalDuration().toMillis(),
-//                        mediaPlayer1.totalDurationProperty()));
-//
-//                    mediaPlayer1.currentTimeProperty().addListener(new ChangeListener<Duration>() {
-//                        @Override
-//                        public void changed(ObservableValue<? extends Duration> observable, Duration oldValue, Duration newValue) {
-//                            slider1.setValue(newValue.toMillis());
-//                        }
-//                    });
-//                    
-//                    if (mediaPlayer2 != null){
-//                        if(mediaPlayer1.getTotalDuration().toMillis() > mediaPlayer2.getTotalDuration().toMillis()){
-//                            slider.maxProperty().bind(Bindings.createDoubleBinding(
-//                                () -> mediaPlayer1.getTotalDuration().toMillis(),
-//                                mediaPlayer1.totalDurationProperty()));
-//
-//                            mediaPlayer1.currentTimeProperty().addListener(new ChangeListener<Duration>() {
-//                                @Override
-//                                public void changed(ObservableValue<? extends Duration> observable, Duration oldValue, Duration newValue) {
-//                                    slider.setValue(newValue.toMillis());
-//                                }
-//                            });
-//                        }
-//                        else {
-//                            slider.maxProperty().bind(Bindings.createDoubleBinding(
-//                                () -> mediaPlayer2.getTotalDuration().toMillis(),
-//                                mediaPlayer2.totalDurationProperty()));
-//
-//                            mediaPlayer2.currentTimeProperty().addListener(new ChangeListener<Duration>() {
-//                                @Override
-//                                public void changed(ObservableValue<? extends Duration> observable, Duration oldValue, Duration newValue) {
-//                                    slider.setValue(newValue.toMillis());
-//                                }
-//                            });
-//                        }
-//                    }
-//                    
-////                    slider1.setOnMouseClicked(new EventHandler<MouseEvent>() {
-////                        @Override
-////                        public void handle(MouseEvent event) {
-////                            mediaPlayer1.seek(Duration.millis(slider1.getValue()));
-////                        }
-////                    });
-//                    
-//                    slider1.valueChangingProperty().addListener(new ChangeListener<Boolean>() {
-//                        @Override
-//                        public void changed(ObservableValue<? extends Boolean> obs, Boolean wasChanging, Boolean isNowChanging) {
-//                            if (! isNowChanging) {
-//                                mediaPlayer1.seek(Duration.seconds(slider1.getValue()));
-//                            }
-//                        }
-//                    });
-                    
-                }
-            });
-            
+        
 
             DoubleProperty width = mediaView1.fitWidthProperty();
             DoubleProperty height = mediaView1.fitHeightProperty();
@@ -346,81 +290,7 @@ public class FXMLController implements Initializable {
             pause2.disableProperty().set(false);
             stop2.disableProperty().set(false);
             openSignals.disableProperty().set(false);
-            
-            
-            mediaPlayer2.setOnReady(new Runnable() {
-                @Override
-                public void run() {
-//                    if (mediaPlayer1 != null){
-//                        double duration1 = mediaPlayer1.totalDurationProperty().getValue().toSeconds();
-//                        double duration2 = mediaPlayer2.totalDurationProperty().getValue().toSeconds();
-//                        System.out.println("duration 1: " + duration1);
-//                        System.out.println("duration 2: " + duration2);
-//                        if (duration1 > duration2)
-//                            System.out.println("1 > 2");
-//                            mediaPlayer1.totalDurationProperty().addListener((obs, oldDuration, newDuration) -> slider.setMax(newDuration.toSeconds()));
-//                            
-//                            mediaPlayer1.currentTimeProperty().addListener((obs, oldTime, newTime) -> {
-//                                if (! slider.isValueChanging()) {
-//                                    slider.setValue(newTime.toSeconds());
-//                                }
-//                            });
-//                    }
-                    
-////                    slider2.maxProperty().bind(Bindings.createDoubleBinding(
-////                        () -> mediaPlayer2.getTotalDuration().toMillis(),
-////                        mediaPlayer2.totalDurationProperty()));
-//
-//                    slider2.setMax(mediaPlayer2.getTotalDuration().toMillis());
-//
-//                    mediaPlayer2.currentTimeProperty().addListener(new ChangeListener<Duration>() {
-//                        @Override
-//                        public void changed(ObservableValue<? extends Duration> observable, Duration oldValue, Duration newValue) {
-//                            slider2.setValue(newValue.toMillis());
-//                        }
-//                    });
-//                    
-//                    
-//                    if (mediaPlayer1 != null){
-//                        if (mediaPlayer1.getTotalDuration().toMillis() > mediaPlayer2.getTotalDuration().toMillis()){
-//                            slider.maxProperty().bind(Bindings.createDoubleBinding(
-//                                () -> mediaPlayer1.getTotalDuration().toMillis(),
-//                                mediaPlayer1.totalDurationProperty()));
-//
-//                            mediaPlayer1.currentTimeProperty().addListener(new ChangeListener<Duration>() {
-//                                @Override
-//                                public void changed(ObservableValue<? extends Duration> observable, Duration oldValue, Duration newValue) {
-//                                    slider.setValue(newValue.toMillis());
-//                                }
-//                            });
-//                        }
-//                        else {
-//                            slider.maxProperty().bind(Bindings.createDoubleBinding(
-//                                () -> mediaPlayer2.getTotalDuration().toMillis(),
-//                                mediaPlayer2.totalDurationProperty()));
-//
-//                            mediaPlayer2.currentTimeProperty().addListener(new ChangeListener<Duration>() {
-//                                @Override
-//                                public void changed(ObservableValue<? extends Duration> observable, Duration oldValue, Duration newValue) {
-//                                    slider.setValue(newValue.toMillis());
-//                                }
-//                            });
-//                        }
-//
-//                        slider2.setOnMouseClicked(new EventHandler<MouseEvent>() {
-//                            @Override
-//                            public void handle(MouseEvent event) {
-//                                System.out.println("mediaPlayer2.currentTime: " + mediaPlayer2.getCurrentTime());
-//                                System.out.println("slider2.getValue: " + slider2.getValue());
-//
-//
-//                                mediaPlayer2.seek(Duration.millis(slider2.getValue()));
-//
-//                            }
-//                        });
-//                    }
-                }
-            });
+
          
             DoubleProperty width = mediaView2.fitWidthProperty();
             DoubleProperty height = mediaView2.fitHeightProperty();
@@ -662,7 +532,7 @@ public class FXMLController implements Initializable {
 //        double offset2 = slider2.getValue()*slider2.getWidth()/slider2.getMax();
 //        double offsetSignals = sliderSignals.getValue()*sliderSignals.getWidth()/sliderSignals.getMax();
         
-        Marker marker = new Marker(5, slider.getHeight(), offset);
+        Marker marker = new Marker(8, slider.getHeight(), offset);
         marker.setFill(Color.RED);
         
         marker.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -688,7 +558,7 @@ public class FXMLController implements Initializable {
             }
         });
         
-        AnchorPane.setBottomAnchor(marker, 0.0);
+        AnchorPane.setBottomAnchor(marker, 5.0);
         AnchorPane.setLeftAnchor(marker, offset);
 //        log.log(Level.INFO, "offset: {0}", offset);
         
@@ -703,7 +573,6 @@ public class FXMLController implements Initializable {
 //                for (int i = 0; i < 100; i++) {
 
                 while (true){
-//                    System.out.println("Signals counter: " + signalsCounter);
                     Thread.sleep(1);
                     if (stop){
                         play = false;
@@ -712,7 +581,8 @@ public class FXMLController implements Initializable {
                     if (play){
                         
                         Thread.sleep(1000);
-                        System.out.println("Signals counter: " + signalsCounter);
+                        
+                        log.log(Level.INFO, "Signals counter: {0}", signalsCounter);
                         int index = signalsCounter * samplingRate;
                         
                         if (index < signals.size())

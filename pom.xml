@@ -32,6 +32,7 @@
             <scope>system</scope>
             <systemPath>${basedir}/lib/bioplux.jar</systemPath>
         </dependency>
+        
     </dependencies>
 
 <!--    <resources>
