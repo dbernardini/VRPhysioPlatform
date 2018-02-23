@@ -18,6 +18,7 @@ public class MainApp extends Application {
         
         stage.setTitle("VRPhysioPlatform");
         stage.setScene(scene);
+        stage.setMaximized(true);
         stage.show();
     }
 

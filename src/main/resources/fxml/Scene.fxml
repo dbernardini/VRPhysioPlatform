@@ -78,12 +78,16 @@
                               <Insets right="5.0" />
                            </HBox.margin>
                         </Button>
-                        <Label fx:id="timeLabel2" />
                      </children>
                      <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
                   </HBox>
+                  <Label fx:id="timeLabel2" GridPane.columnIndex="1" GridPane.halignment="RIGHT">
+                     <GridPane.margin>
+                        <Insets right="30.0" />
+                     </GridPane.margin>
+                  </Label>
                </children>
             </GridPane>
             <Separator prefWidth="200.0">
@@ -95,22 +99,67 @@
                <children>
                   <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                      <children>
-                        <LineChart fx:id="chart1" prefHeight="122.0" prefWidth="1400.0" title="Accelerometer">
-                          <xAxis>
-                            <CategoryAxis side="BOTTOM" />
-                          </xAxis>
-                          <yAxis>
-                            <NumberAxis side="LEFT" />
-                          </yAxis>
-                        </LineChart>
-                        <LineChart fx:id="chart2" prefHeight="122.0" prefWidth="1400.0" title="Temperature">
-                           <xAxis>
-                              <CategoryAxis side="BOTTOM" />
-                           </xAxis>
-                           <yAxis>
-                              <NumberAxis side="LEFT" />
-                           </yAxis>
-                        </LineChart>
+                        <GridPane>
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints vgrow="SOMETIMES" />
+                            <RowConstraints vgrow="SOMETIMES" />
+                            <RowConstraints vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <LineChart fx:id="chart00" maxHeight="50.0" title="Accelerometer">
+                                <xAxis>
+                                  <CategoryAxis side="BOTTOM" />
+                                </xAxis>
+                                <yAxis>
+                                  <NumberAxis side="LEFT" />
+                                </yAxis>
+                              </LineChart>
+                              <LineChart fx:id="chart01" maxHeight="50.0" title="Temperature" GridPane.columnIndex="1">
+                                 <xAxis>
+                                    <CategoryAxis side="BOTTOM" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis side="LEFT" />
+                                 </yAxis>
+                              </LineChart>
+                              <LineChart fx:id="chart10" maxHeight="50.0" title="ECG" GridPane.rowIndex="1">
+                                 <xAxis>
+                                    <CategoryAxis side="BOTTOM" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis side="LEFT" />
+                                 </yAxis>
+                              </LineChart>
+                              <LineChart fx:id="chart11" maxHeight="50.0" title="Respiration" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                 <xAxis>
+                                    <CategoryAxis side="BOTTOM" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis side="LEFT" />
+                                 </yAxis>
+                              </LineChart>
+                              <LineChart fx:id="chart20" maxHeight="50.0" title="EEG" GridPane.rowIndex="2">
+                                 <xAxis>
+                                    <CategoryAxis side="BOTTOM" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis side="LEFT" />
+                                 </yAxis>
+                              </LineChart>
+                              <LineChart fx:id="chart21" maxHeight="50.0" title="EMG" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                 <xAxis>
+                                    <CategoryAxis side="BOTTOM" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis side="LEFT" />
+                                 </yAxis>
+                              </LineChart>
+                           </children>
+                        </GridPane>
                         <Slider fx:id="sliderSignals">
                            <VBox.margin>
                               <Insets left="5.0" right="5.0" />
@@ -137,6 +186,11 @@
                                     <Insets right="5.0" />
                                  </HBox.margin>
                               </Button>
+                              <Label fx:id="timeLabelSignals">
+                                 <HBox.margin>
+                                    <Insets left="30.0" />
+                                 </HBox.margin>
+                              </Label>
                            </children>
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
@@ -151,10 +205,11 @@
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </VBox.margin>
             </Separator>
-            <Slider fx:id="slider">
-               <VBox.margin>
-                  <Insets left="5.0" right="5.0" />
-               </VBox.margin></Slider>
+            <AnchorPane fx:id="anchorPane">
+               <children>
+                  <Slider fx:id="slider" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+               </children>
+            </AnchorPane>
             <HBox alignment="CENTER">
                <children>
                   <Button fx:id="playAll" disable="true" mnemonicParsing="false" onAction="#playAll" text="Play all">
@@ -172,11 +227,16 @@
                         <Insets right="5.0" />
                      </HBox.margin>
                   </Button>
-                  <Button fx:id="insertMark" disable="true" mnemonicParsing="false" onAction="#insertMarker" text="Insert mark">
+                  <Button fx:id="insertMark" disable="true" mnemonicParsing="false" onAction="#insertMarker" text="Insert marker">
                      <HBox.margin>
                         <Insets left="20.0" right="5.0" />
                      </HBox.margin>
                   </Button>
+                  <Label fx:id="timeLabel">
+                     <HBox.margin>
+                        <Insets left="30.0" />
+                     </HBox.margin>
+                  </Label>
                </children>
                <VBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

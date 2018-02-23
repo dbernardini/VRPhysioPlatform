@@ -19,18 +19,23 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Cursor;
+import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
@@ -45,16 +50,14 @@ import plux.newdriver.bioplux.*;
 public class FXMLController implements Initializable {
 
     private static final String DEVICE = "00:07:80:FC:57:19";
-    private static final double MIN_CHANGE = 0.5;
-    private static final int MARKER_RADIUS = 7;
+    private static final double MIN_CHANGE = 0.1;
+    private static final double SLIDER_MARGIN_RL = 5;
+    private static final double SLIDER_MARGIN_BOTTOM = 2;
     
     Logger log = Logger.getLogger(FXMLController.class.getName());
 
-    private MediaPlayer mediaPlayer1;
-    private MediaPlayer mediaPlayer2;
-    
     @FXML
-    private AnchorPane anchorPane1, anchorPane2;
+    private AnchorPane anchorPane1, anchorPane2, anchorPane;
 
     @FXML
     private MediaView mediaView1, mediaView2;
@@ -63,7 +66,7 @@ public class FXMLController implements Initializable {
     private Slider slider1, slider2, sliderSignals, slider;
     
     @FXML
-    private Label timeLabel1, timeLabel2;
+    private Label timeLabel1, timeLabel2, timeLabelSignals, timeLabel;
     
     @FXML
     private Button open1, play1, pause1, stop1, open2, play2, pause2, stop2,
@@ -71,10 +74,12 @@ public class FXMLController implements Initializable {
             pauseAll, stopAll, insertMark;
     
     @FXML
-    private LineChart<String, Number> chart1, chart2;
+    private LineChart<String, Number> chart00, chart01;
     
     XYChart.Series<String, Number> series1, series2, series3, series4;
 
+    private MediaPlayer mediaPlayer1;
+    private MediaPlayer mediaPlayer2;
     private String videoPath1;
     private String videoPath2;
     private String signalsPath;
@@ -82,6 +87,13 @@ public class FXMLController implements Initializable {
     private boolean stop = false;
     private int signalsCounter = 0;
     private BufferedReader br;
+    private int samplingRate;
+    private double signalsDuration;
+    private double stageWidth;
+    private double stageHeigth;
+    private int markerRadius;
+    private Scene scene;
+    private Stage stage;
     
     private ArrayList<String> signals = new ArrayList<>();
     
@@ -134,7 +146,7 @@ public class FXMLController implements Initializable {
 //     catch (BPException err)
 //     {
 //        System.out.println("Exception: " + err.code + " - " + err.getMessage());
-//     }
+//     }                
 
         series1 = new XYChart.Series<>();
         series1.setName("X");
@@ -145,11 +157,12 @@ public class FXMLController implements Initializable {
         series4 = new XYChart.Series<>();
         series4.setName("Temp");
        
-        chart1.getData().add(series1);
-        chart1.getData().add(series2);
-        chart1.getData().add(series3);
-        chart2.getData().add(series4);
+        chart00.getData().add(series1);
+        chart00.getData().add(series2);
+        chart00.getData().add(series3);
+        chart01.getData().add(series4);
 
+        
     }
 
     @FXML
@@ -158,7 +171,7 @@ public class FXMLController implements Initializable {
         FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("Select a video file", "*.mp4");
         fileChooser.getExtensionFilters().add(filter);
         File file = fileChooser.showOpenDialog(null);
-
+        
         videoPath1 = file.toURI().toString();
         if (videoPath1 != null) {
             Media media = new Media(videoPath1);
@@ -205,7 +218,7 @@ public class FXMLController implements Initializable {
             stop1.disableProperty().set(false);
             open2.disableProperty().set(false);
             
-            
+            markerRadius = (int)(slider.getHeight()/2);
             mediaPlayer1.setOnReady(new Runnable() {
                 @Override
                 public void run() {
@@ -276,6 +289,11 @@ public class FXMLController implements Initializable {
             width.bind(Bindings.selectDouble(mediaView1.parentProperty(), "width"));
             height.bind(Bindings.selectDouble(mediaView1.parentProperty(), "height"));
 
+            scene = anchorPane.getScene();
+            stage = (Stage) scene.getWindow();
+            stageWidth = stage.getWidth();
+            stageHeigth = stage.getHeight();
+            
         }
     }
 
@@ -479,11 +497,7 @@ public class FXMLController implements Initializable {
                 }
                 br.close();
 
-                String last = signals.get(signals.size()-2);
-                double lenght = Double.parseDouble(last.split("\t")[0]);
-                sliderSignals.setMax(lenght);
-                sliderSignals.setValue(0);
-                sliderSignals.setBlockIncrement(1);
+                
 
 
 
@@ -508,15 +522,25 @@ public class FXMLController implements Initializable {
                 insertMark.disableProperty().set(false);
 
                 
+                String last = signals.get(signals.size()-2);
+                double lenght = Double.parseDouble(last.split("\t")[0]);
+                
+                sliderSignals.setValue(0);
+                sliderSignals.setBlockIncrement(1);
+                
+                
                 double duration1 = mediaPlayer1.totalDurationProperty().getValue().toSeconds();
                 double duration2 = mediaPlayer2.totalDurationProperty().getValue().toSeconds();
                 
                 JsonParser parser = new JsonParser();
                 JsonObject o = parser.parse(properties).getAsJsonObject();
                 JsonObject dev = o.getAsJsonObject(DEVICE);
-                int samplingRate = dev.get("sampling rate").getAsInt();
+                samplingRate = dev.get("sampling rate").getAsInt();
 
-                double signalsDuration = lenght/samplingRate;
+                signalsDuration = lenght/samplingRate;
+                
+                sliderSignals.setMax(signalsDuration);
+                log.log(Level.INFO, "signalsDuration: {0}", signalsDuration);
 
                 double min = Math.min(signalsDuration, Math.min(duration1, duration2));
                 
@@ -627,28 +651,57 @@ public class FXMLController implements Initializable {
     
     @FXML
     private void insertMarker(ActionEvent event) {
-        double currentTime = slider.getValue();
-        Circle marker = new Circle(MARKER_RADIUS);
+//        double currentTime = slider.getValue();
         
-        Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
-        log.log(Level.INFO, "Screen X: {0}", primScreenBounds.getWidth());
-        log.log(Level.INFO, "Screen Y: {0}", primScreenBounds.getHeight());
-        Stage stage = (Stage)marker.getScene().getWindow();
-        log.log(Level.INFO, "Window X: {0}", stage.getWidth());
-        log.log(Level.INFO, "Window Y: {0}", stage.getHeight());
-        AnchorPane.setBottomAnchor(marker, 2.0);
-        AnchorPane.setLeftAnchor(marker, currentTime);
-        log.log(Level.INFO, "currentTime: {0}", currentTime);
-        log.log(Level.INFO, "anchor: {0}", AnchorPane.getLeftAnchor(marker));
-        anchorPane1.getChildren().add(marker);
+//        log.log(Level.INFO, "sliderWidth: {0}", slider1.getWidth());
+//        log.log(Level.INFO, "sliderValue: {0}", slider1.getValue());
+//        log.log(Level.INFO, "sliderMax: {0}", slider1.getMax());
+        
+        double offset = slider.getValue()*slider.getWidth()/slider.getMax();
+//        double offset1 = slider1.getValue()*slider1.getWidth()/slider1.getMax();
+//        double offset2 = slider2.getValue()*slider2.getWidth()/slider2.getMax();
+//        double offsetSignals = sliderSignals.getValue()*sliderSignals.getWidth()/sliderSignals.getMax();
+        
+        Marker marker = new Marker(5, slider.getHeight(), offset);
+        marker.setFill(Color.RED);
+        
+        marker.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                log.log(Level.INFO, "marker offset: {0}", marker.getOffset());
+                double value = marker.getOffset()*slider.getMax()/slider.getWidth();
+                slider.setValue(value);
+            }
+        });
+        
+        marker.setOnMouseEntered(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                scene.setCursor(Cursor.HAND);
+            }
+        });
+        
+        marker.setOnMouseExited(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                scene.setCursor(Cursor.DEFAULT);
+            }
+        });
+        
+        AnchorPane.setBottomAnchor(marker, 0.0);
+        AnchorPane.setLeftAnchor(marker, offset);
+//        log.log(Level.INFO, "offset: {0}", offset);
+        
+        anchorPane.getChildren().add(marker);
                 
-        
+//        currentTime:totalTime=offset:slider
     }
     
     private void readData(){
-        String line;
+        String line = null;
             try {
 //                for (int i = 0; i < 100; i++) {
+
                 while (true){
 //                    System.out.println("Signals counter: " + signalsCounter);
                     Thread.sleep(1);
@@ -657,20 +710,26 @@ public class FXMLController implements Initializable {
                         stop = false;
                     }
                     if (play){
+                        
                         Thread.sleep(1000);
                         System.out.println("Signals counter: " + signalsCounter);
-                        line = signals.get(1);
-
+                        int index = signalsCounter * samplingRate;
+                        
+                        if (index < signals.size())
+                            line = signals.get(signalsCounter * samplingRate);
+                        else break;
+                        
                         if (line != null){
 
                             String[] parts = line.split("\t");
-
                             
-                            series1.getData().remove(0);
-                            series2.getData().remove(0);
-                            series3.getData().remove(0);
-                            series4.getData().remove(0);
-                               
+                            log.log(Level.INFO, "NOT NULL");
+                            if (series1.getData().size() >= 10){
+                                series1.getData().remove(0);
+                                series2.getData().remove(0);
+                                series3.getData().remove(0);
+                                series4.getData().remove(0);
+                            }
                             
                             
                             series1.getData().add(new XYChart.Data<>(signalsCounter + "", Integer.parseInt(parts[2])));
@@ -678,7 +737,6 @@ public class FXMLController implements Initializable {
                             series3.getData().add(new XYChart.Data<>(signalsCounter + "", Integer.parseInt(parts[4])));
                             series4.getData().add(new XYChart.Data<>(signalsCounter + "", Integer.parseInt(parts[5])));
 
-//                            signalsCounter++;
                             sliderSignals.increment();
                         }
                         else{
@@ -686,6 +744,7 @@ public class FXMLController implements Initializable {
                         }
                     }
                 }
+                log.log(Level.INFO, "EXIT LOOP");
                 br.close();
             }
             catch (Exception ex) {
