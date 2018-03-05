@@ -1,25 +1,66 @@
 package com.bernardini.vrphysioplatform;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
+import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 
 public class MainApp extends Application {
 
+    Scene offlineScene, realtimeScene;
+    
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/Scene.fxml"));
-        Scene scene = new Scene(root);
-        scene.getStylesheets().add("/styles/Styles.css");
+        Parent root = FXMLLoader.load(getClass().getResource("/fxml/OfflineScene.fxml"));
+        offlineScene = new Scene(root);
+        offlineScene.getStylesheets().add("/styles/OfflineScene.css");
+        
+        root = FXMLLoader.load(getClass().getResource("/fxml/RealtimeScene.fxml"));
+        realtimeScene = new Scene(root);
+        realtimeScene.getStylesheets().add("/styles/RealtimeScene.css");
         
         stage.setTitle("VRPhysioPlatform");
-        stage.setScene(scene);
+        stage.setScene(realtimeScene);
         stage.setMaximized(true);
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            public void handle(WindowEvent we) {
+                ExecutorService executorService = Executors.newFixedThreadPool(10);
+        System.out.println("STOOOOOOOOOOOOOOOOOOP");
+        executorService.shutdown();
+        try {
+            executorService.awaitTermination(1, TimeUnit.SECONDS); // wait for 10s in this case
+        } catch (InterruptedException ex) {
+            Logger.getLogger(MainApp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        executorService.shutdownNow();
+            }
+        });  
         stage.show();
+    }
+    
+    @Override
+    public void stop(){
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        System.out.println("STOOOOOOOOOOOOOOOOOOP");
+        executorService.shutdown();
+        try {
+            executorService.awaitTermination(1, TimeUnit.SECONDS); // wait for 10s in this case
+        } catch (InterruptedException ex) {
+            Logger.getLogger(MainApp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        executorService.shutdownNow();
     }
 
     /** 
