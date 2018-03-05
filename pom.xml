@@ -26,18 +26,23 @@
             <version>2.8.2</version>
         </dependency>
         <dependency>
-            <groupId>plux.api</groupId>
-            <artifactId>plux</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/lib/bioplux.jar</systemPath>
-        </dependency>
-        <dependency>
             <groupId>org.bytedeco</groupId>
             <artifactId>javacv-platform</artifactId>
             <version>1.4</version>
         </dependency>
+        <dependency>
+            <groupId>pluxApi</groupId>
+            <artifactId>plux</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
+    
+    <repositories>
+        <repository>
+            <id>local-maven-repo</id>
+            <url>file:///${project.basedir}/local-maven-repo</url>
+        </repository>
+    </repositories>
 
 <!--    <resources>
         <resource>

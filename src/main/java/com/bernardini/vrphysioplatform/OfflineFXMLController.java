@@ -56,8 +56,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import plux.newdriver.bioplux.BPException;
-import plux.newdriver.bioplux.Device;
+//import plux.newdriver.bioplux.BPException;
+//import plux.newdriver.bioplux.Device;
 
 /**
  *
@@ -132,51 +132,7 @@ public class OfflineFXMLController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-//        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-//        log.log(Level.INFO, "TS 1: {0}", timestamp.getTime());
-//        timestamp = new Timestamp(System.currentTimeMillis());
-//        log.log(Level.INFO, "TS 2: {0}", timestamp.getTime());
-//        timestamp = new Timestamp(System.currentTimeMillis());
-//        log.log(Level.INFO, "TS 3: {0}", timestamp.getTime());
-//        timestamp = new Timestamp(System.currentTimeMillis());
-//        log.log(Level.INFO, "TS 4: {0}", timestamp.getTime());
-//                try
-//     {
-//        // decomment next block to search for bioPlux devices
-//        
-//        Vector devs = new Vector();
-//        Device.FindDevices(devs);
-//        System.out.println("Found devices: " + devs);
-//        
-//
-////        Device dev = new Device("Test"); // virtual test device (no connection to a physical device)
-//        Device dev = new Device("DEVICE"); // MAC address of physical device
-//
-//        System.out.println("Description: " + dev.GetDescription());
-//
-//        // initialize frames vector and each frame within the vector
-//        Device.Frame[] frames = new Device.Frame[1000];
-//        for (int i = 0; i < 1000; i++)
-//           frames[i] = new Device.Frame();
-//
-//        dev.BeginAcq(1000, 0xFF, 12); // 1000 Hz, 8 channels, 12 bits
-//        dev.GetFrames(1000, frames); // get first 1000 frames
-//
-//        for (int i = 0; i < 20; i++) // print first 20 frames
-//        {
-//           System.out.print("seq: " + frames[i].seq + " dig_in: " + frames[i].dig_in + " an_in: ");
-//           for (int j = 0; j < 8; j++)
-//              System.out.print(frames[i].an_in[j] + " , ");
-//           System.out.println();
-//        }
-//
-//        dev.EndAcq();
-//        dev.Close();
-//     }
-//     catch (BPException err)
-//     {
-//        System.out.println("Exception: " + err.code + " - " + err.getMessage());
-//     }                
+            
 
         series1 = new XYChart.Series<>();
         series1.setName("X");
@@ -480,8 +436,7 @@ public class OfflineFXMLController implements Initializable {
                     });
                 
                 
-                Timeline updateGraphs = new Timeline(new KeyFrame(Duration.seconds(1),
-                        new EventHandler<ActionEvent>() {
+                Timeline updateGraphs = new Timeline(new KeyFrame(Duration.seconds(1), new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent event) {
                         String line = null;
@@ -624,68 +579,5 @@ public class OfflineFXMLController implements Initializable {
         BorderPane root = FXMLLoader.load(getClass().getResource("/fxml/RealtimeScene.fxml"));
         stage.getScene().setRoot(root);
     }
-    
-    private void readData(){
-        String line = null;
-        try {
-//                for (int i = 0; i < 100; i++) {
-
-            while (true){
-                Thread.sleep(1);
-                if (stop){
-                    play = false;
-                    stop = false;
-                }
-                if (play){
-
-                    Thread.sleep(1000);
-
-                    log.log(Level.INFO, "Signals counter: {0}", signalsCounter);
-                    int index = signalsCounter * samplingRate;
-
-                    if (index < signals.size())
-                        line = signals.get(signalsCounter * samplingRate);
-                    else break;
-
-                    if (line != null){
-
-                        String[] parts = line.split("\t");
-
-                        log.log(Level.INFO, "NOT NULL");
-                        if (series1.getData().size() >= 10){
-                            series1.getData().remove(0);
-                            series2.getData().remove(0);
-                            series3.getData().remove(0);
-                            series4.getData().remove(0);
-                        }
-
-
-                        series1.getData().add(new XYChart.Data<>(signalsCounter + "", Integer.parseInt(parts[2])));
-                        series2.getData().add(new XYChart.Data<>(signalsCounter + "", Integer.parseInt(parts[3])));
-                        series3.getData().add(new XYChart.Data<>(signalsCounter + "", Integer.parseInt(parts[4])));
-                        series4.getData().add(new XYChart.Data<>(signalsCounter + "", Integer.parseInt(parts[5])));
-
-                        sliderSignals.increment();
-                    }
-                    else{
-                        break;
-                    }
-                }
-            }
-            log.log(Level.INFO, "EXIT LOOP");
-            br.close();
-        }
-        catch (Exception ex) {
-            Logger.getLogger(OfflineFXMLController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
-    class ReadData implements Runnable {
-
-        @Override
-        public void run() {
-            readData();
-        }
-
-    }
+  
 }

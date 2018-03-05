@@ -13,6 +13,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -34,33 +35,18 @@ public class MainApp extends Application {
         stage.setTitle("VRPhysioPlatform");
         stage.setScene(realtimeScene);
         stage.setMaximized(true);
-        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            public void handle(WindowEvent we) {
-                ExecutorService executorService = Executors.newFixedThreadPool(10);
-        System.out.println("STOOOOOOOOOOOOOOOOOOP");
-        executorService.shutdown();
-        try {
-            executorService.awaitTermination(1, TimeUnit.SECONDS); // wait for 10s in this case
-        } catch (InterruptedException ex) {
-            Logger.getLogger(MainApp.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        executorService.shutdownNow();
-            }
-        });  
+        
+        
         stage.show();
     }
     
     @Override
-    public void stop(){
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
-        System.out.println("STOOOOOOOOOOOOOOOOOOP");
-        executorService.shutdown();
-        try {
-            executorService.awaitTermination(1, TimeUnit.SECONDS); // wait for 10s in this case
-        } catch (InterruptedException ex) {
-            Logger.getLogger(MainApp.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        executorService.shutdownNow();
+    public void stop() throws Exception {
+        super.stop(); 
+        FXMLLoader fxmlLoader = new FXMLLoader();
+        fxmlLoader.load(getClass().getResource("/fxml/RealtimeScene.fxml").openStream());
+        RealtimeFXMLController controller = (RealtimeFXMLController) fxmlLoader.getController();
+        controller.stopAcquisitions();
     }
 
     /** 
