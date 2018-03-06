@@ -67,12 +67,12 @@
                 <RowConstraints vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <LineChart fx:id="forceChart" animated="false" legendSide="RIGHT" maxHeight="50.0" title="Force" GridPane.rowIndex="1">
+                  <LineChart fx:id="forceChart" animated="false" maxHeight="50.0" title="Force" GridPane.rowIndex="1">
                     <xAxis>
                       <CategoryAxis side="BOTTOM" />
                     </xAxis>
                     <yAxis>
-                      <NumberAxis fx:id="numberAxis00" forceZeroInRange="false" side="LEFT" />
+                      <NumberAxis fx:id="numberAxis00" forceZeroInRange="false" label="Raw" side="LEFT" />
                     </yAxis>
                   </LineChart>
                   <LineChart fx:id="tempChart" animated="false" maxHeight="50.0" title="Temperature" GridPane.columnIndex="1" GridPane.rowIndex="1">
@@ -80,7 +80,7 @@
                         <CategoryAxis side="BOTTOM" />
                      </xAxis>
                      <yAxis>
-                        <NumberAxis forceZeroInRange="false" side="LEFT" />
+                        <NumberAxis forceZeroInRange="false" label="°C" side="LEFT" />
                      </yAxis>
                   </LineChart>
                   <LineChart fx:id="edaChart" animated="false" maxHeight="50.0" title="EDA" GridPane.rowIndex="2">
@@ -88,7 +88,7 @@
                         <CategoryAxis side="BOTTOM" />
                      </xAxis>
                      <yAxis>
-                        <NumberAxis forceZeroInRange="false" side="LEFT" />
+                        <NumberAxis forceZeroInRange="false" label="μS" side="LEFT" />
                      </yAxis>
                   </LineChart>
                   <LineChart fx:id="respChart" animated="false" maxHeight="50.0" title="Respiration" GridPane.columnIndex="1" GridPane.rowIndex="2">
@@ -96,7 +96,7 @@
                         <CategoryAxis side="BOTTOM" />
                      </xAxis>
                      <yAxis>
-                        <NumberAxis forceZeroInRange="false" side="LEFT" />
+                        <NumberAxis forceZeroInRange="false" label="\%" side="LEFT" />
                      </yAxis>
                   </LineChart>
                   <LineChart fx:id="eegChart" animated="false" maxHeight="50.0" title="EEG" GridPane.rowIndex="3">
@@ -104,15 +104,15 @@
                         <CategoryAxis side="BOTTOM" />
                      </xAxis>
                      <yAxis>
-                        <NumberAxis forceZeroInRange="false" side="LEFT" />
+                        <NumberAxis forceZeroInRange="false" label="μV" side="LEFT" />
                      </yAxis>
                   </LineChart>
-                  <LineChart fx:id="accChart" animated="false" maxHeight="50.0" title="Accelerometer" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                  <LineChart fx:id="accChart" animated="false" legendSide="RIGHT" maxHeight="50.0" title="Accelerometer" GridPane.columnIndex="1" GridPane.rowIndex="3">
                      <xAxis>
                         <CategoryAxis side="BOTTOM" />
                      </xAxis>
                      <yAxis>
-                        <NumberAxis forceZeroInRange="false" side="LEFT" />
+                        <NumberAxis autoRanging="false" forceZeroInRange="false" label="g" lowerBound="-1.0" side="LEFT" upperBound="1.0" />
                      </yAxis>
                   </LineChart>
                   <LineChart fx:id="ecgChart" animated="false" maxHeight="50.0" title="ECG">
@@ -120,7 +120,7 @@
                         <CategoryAxis side="BOTTOM" />
                      </xAxis>
                      <yAxis>
-                        <NumberAxis forceZeroInRange="false" side="LEFT" />
+                        <NumberAxis forceZeroInRange="false" label="mV" side="LEFT" />
                      </yAxis>
                   </LineChart>
                   <LineChart fx:id="emgChart" animated="false" maxHeight="50.0" title="EMG" GridPane.columnIndex="1">
@@ -128,7 +128,7 @@
                         <CategoryAxis side="BOTTOM" />
                      </xAxis>
                      <yAxis>
-                        <NumberAxis forceZeroInRange="false" side="LEFT" />
+                        <NumberAxis forceZeroInRange="false" label="mV" side="LEFT" />
                      </yAxis>
                   </LineChart>
                </children>
