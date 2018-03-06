@@ -69,7 +69,7 @@ public class RealtimeFXMLController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-
+        
         /*      SETUP SENSORS     */
         
         seriesX = new XYChart.Series<>();
@@ -122,6 +122,7 @@ public class RealtimeFXMLController implements Initializable {
        
             Vector devs = new Vector();
             Device.FindDevices(devs);
+            
             deviceMAC = (String) devs.get(0);
 
            
@@ -211,13 +212,9 @@ public class RealtimeFXMLController implements Initializable {
         try {
             dev.EndAcq();
             dev.Close();
-            
             grabber.stop();
             grabber.close();
-            System.out.println("STOP");
-        } catch (FrameGrabber.Exception ex) {
-            Logger.getLogger(RealtimeFXMLController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (BPException ex) {
+        } catch (FrameGrabber.Exception | BPException ex) {
             Logger.getLogger(RealtimeFXMLController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

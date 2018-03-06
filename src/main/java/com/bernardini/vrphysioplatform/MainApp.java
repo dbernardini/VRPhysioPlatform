@@ -20,22 +20,27 @@ import javafx.stage.WindowEvent;
 
 public class MainApp extends Application {
 
-    Scene offlineScene, realtimeScene;
+    private Scene offlineScene, realtimeScene;
+    private RealtimeFXMLController realtimeController; 
+    private OfflineFXMLController offlineController; 
     
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/OfflineScene.fxml"));
-        offlineScene = new Scene(root);
+        FXMLLoader offlineFxmlLoader = new FXMLLoader(getClass().getResource("/fxml/OfflineScene.fxml"));
+        Parent offlineRoot = offlineFxmlLoader.load();
+        offlineController = offlineFxmlLoader.getController();
+        offlineScene = new Scene(offlineRoot);
         offlineScene.getStylesheets().add("/styles/OfflineScene.css");
         
-        root = FXMLLoader.load(getClass().getResource("/fxml/RealtimeScene.fxml"));
-        realtimeScene = new Scene(root);
+        FXMLLoader realtimeFxmlLoader = new FXMLLoader(getClass().getResource("/fxml/RealtimeScene.fxml"));
+        Parent realtimeRoot = realtimeFxmlLoader.load();
+        realtimeController = realtimeFxmlLoader.getController();
+        realtimeScene = new Scene(realtimeRoot);
         realtimeScene.getStylesheets().add("/styles/RealtimeScene.css");
         
         stage.setTitle("VRPhysioPlatform");
         stage.setScene(realtimeScene);
         stage.setMaximized(true);
-        
         
         stage.show();
     }
@@ -43,10 +48,7 @@ public class MainApp extends Application {
     @Override
     public void stop() throws Exception {
         super.stop(); 
-        FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.load(getClass().getResource("/fxml/RealtimeScene.fxml").openStream());
-        RealtimeFXMLController controller = (RealtimeFXMLController) fxmlLoader.getController();
-        controller.stopAcquisitions();
+        realtimeController.stopAcquisitions();
     }
 
     /** 
