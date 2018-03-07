@@ -9,6 +9,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -19,6 +23,7 @@ import javafx.geometry.HPos;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -43,6 +48,10 @@ public class RealtimeFXMLController implements Initializable {
     private Button playAll, pauseAll, stopAll, insertMark;
     
     @FXML
+    private ComboBox<String> comboBox1, comboBox2, comboBox3, comboBox4, 
+            comboBox5, comboBox6, comboBox7, comboBox8; 
+    
+    @FXML
     private LineChart<String, Number> ecgChart, emgChart, forceChart, tempChart,
             edaChart, respChart, eegChart, accChart;
     
@@ -62,6 +71,18 @@ public class RealtimeFXMLController implements Initializable {
     private static final double EEG_GAIN = 40000;
     private static final double EDA_CONST = 0.12;
     private static final double POW_2_N = Math.pow(2, N_BITS);
+    private static final ObservableList<String> SENSORS = FXCollections.observableArrayList(
+            "ACC X",
+            "ACC Y",
+            "ACC Z",
+            "ECG",
+            "EDA",
+            "EEG",
+            "EMG",
+            "Force",
+            "Resp",
+            "Temp"
+        );
     
     
     Logger log = Logger.getLogger(OfflineFXMLController.class.getName());
@@ -73,16 +94,29 @@ public class RealtimeFXMLController implements Initializable {
     private Device dev;
     private Device.Frame[] frames;
     private OpenCVFrameGrabber grabber;
+    private Thread cameraThread;
+    private Timeline updateGraphs;
+    
+    private int accXPos;
+    private int accYPos;
+    private int accZPos;
+    private int ecgPos;
+    private int edaPos;
+    private int eegPos;
+    private int emgPos;
+    private int forcePos;
+    private int respPos;
+    private int tempPos;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
         /*      SETUP SENSORS     */
         
-//        seriesX = new XYChart.Series<>();
-//        seriesX.setName("X");
-//        seriesY = new XYChart.Series<>();
-//        seriesY.setName("Y");
+        seriesX = new XYChart.Series<>();
+        seriesX.setName("X");
+        seriesY = new XYChart.Series<>();
+        seriesY.setName("Y");
         seriesZ = new XYChart.Series<>();
         seriesZ.setName("Z");
         seriesTemp = new XYChart.Series<>();
@@ -101,8 +135,8 @@ public class RealtimeFXMLController implements Initializable {
         seriesResp.setName("Resp");
         
         for (int i = 0; i < 10; i++){
-//            seriesX.getData().add(new XYChart.Data<>(i + "", 0));
-//            seriesY.getData().add(new XYChart.Data<>(i + "", 0));
+            seriesX.getData().add(new XYChart.Data<>(i + "", 0));
+            seriesY.getData().add(new XYChart.Data<>(i + "", 0));
             seriesZ.getData().add(new XYChart.Data<>(i + "", 0));
             seriesTemp.getData().add(new XYChart.Data<>(i + "", 0));
             seriesEcg.getData().add(new XYChart.Data<>(i + "", 0));
@@ -115,18 +149,419 @@ public class RealtimeFXMLController implements Initializable {
         
 //        accChart.getData().add(seriesX);
 //        accChart.getData().add(seriesY);
-        accChart.getData().add(seriesZ);
-        tempChart.getData().add(seriesTemp);
-        ecgChart.getData().add(seriesEcg);
-        emgChart.getData().add(seriesEmg);
-        eegChart.getData().add(seriesEeg);
-        edaChart.getData().add(seriesEda);
-        forceChart.getData().add(seriesForce);
-        respChart.getData().add(seriesResp);
-              
+//        accChart.getData().add(seriesZ);
+//        tempChart.getData().add(seriesTemp);
+//        ecgChart.getData().add(seriesEcg);
+//        emgChart.getData().add(seriesEmg);
+//        eegChart.getData().add(seriesEeg);
+//        edaChart.getData().add(seriesEda);
+//        forceChart.getData().add(seriesForce);
+//        respChart.getData().add(seriesResp);
+           
+        
+        comboBox1.setItems(SENSORS);
+        comboBox2.setItems(SENSORS);
+        comboBox3.setItems(SENSORS);
+        comboBox4.setItems(SENSORS);
+        comboBox5.setItems(SENSORS);
+        comboBox6.setItems(SENSORS);
+        comboBox7.setItems(SENSORS);
+        comboBox8.setItems(SENSORS);
    
+        comboBox1.valueProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                switch (newValue){
+                    case "ACC X":
+                        accChart.getData().add(seriesX);
+                        accXPos = 0;
+                        break;
+                    case "ACC Y":
+                        accChart.getData().add(seriesY);
+                        accYPos = 0;
+                        break;
+                    case "ACC Z":
+                        accChart.getData().add(seriesZ);
+                        accZPos = 0;
+                        break;
+                    case "ECG":
+                        ecgChart.getData().add(seriesEcg);
+                        ecgPos = 0;
+                        break;
+                    case "EDA":
+                        edaChart.getData().add(seriesEda);
+                        edaPos = 0;
+                        break;
+                    case "EEG":
+                        eegChart.getData().add(seriesEeg);
+                        eegPos = 0;
+                        break;
+                    case "EMG":
+                        emgChart.getData().add(seriesEmg);
+                        emgPos = 0;
+                        break;
+                    case "Force":
+                        forceChart.getData().add(seriesForce);
+                        forcePos = 0;
+                        break;
+                    case "Resp":
+                        respChart.getData().add(seriesResp);
+                        respPos = 0;
+                        break;
+                    case "Temp":
+                        tempChart.getData().add(seriesTemp);
+                        tempPos = 0;
+                        break; 
+                    default:
+                        System.err.println("Error with the ComboBox");
+                }
+            }
+        });
+        comboBox2.valueProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                switch (newValue){
+                    case "ACC X":
+                        accChart.getData().add(seriesX);
+                        accXPos = 1;
+                        break;
+                    case "ACC Y":
+                        accChart.getData().add(seriesY);
+                        accYPos = 1;
+                        break;
+                    case "ACC Z":
+                        accChart.getData().add(seriesZ);
+                        accZPos = 1;
+                        break;
+                    case "ECG":
+                        ecgChart.getData().add(seriesEcg);
+                        ecgPos = 1;
+                        break;
+                    case "EDA":
+                        edaChart.getData().add(seriesEda);
+                        edaPos = 1;
+                        break;
+                    case "EEG":
+                        eegChart.getData().add(seriesEeg);
+                        eegPos = 1;
+                        break;
+                    case "EMG":
+                        emgChart.getData().add(seriesEmg);
+                        emgPos = 1;
+                        break;
+                    case "Force":
+                        forceChart.getData().add(seriesForce);
+                        forcePos = 1;
+                        break;
+                    case "Resp":
+                        respChart.getData().add(seriesResp);
+                        respPos = 1;
+                        break;
+                    case "Temp":
+                        tempChart.getData().add(seriesTemp);
+                        tempPos = 1;
+                        break; 
+                    default:
+                        System.err.println("Error with the ComboBox");
+                }
+            }
+        });
+        comboBox3.valueProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                switch (newValue){
+                    case "ACC X":
+                        accChart.getData().add(seriesX);
+                        accXPos = 2;
+                        break;
+                    case "ACC Y":
+                        accChart.getData().add(seriesY);
+                        accYPos = 2;
+                        break;
+                    case "ACC Z":
+                        accChart.getData().add(seriesZ);
+                        accZPos = 2;
+                        break;
+                    case "ECG":
+                        ecgChart.getData().add(seriesEcg);
+                        ecgPos = 2;
+                        break;
+                    case "EDA":
+                        edaChart.getData().add(seriesEda);
+                        edaPos = 2;
+                        break;
+                    case "EEG":
+                        eegChart.getData().add(seriesEeg);
+                        eegPos = 2;
+                        break;
+                    case "EMG":
+                        emgChart.getData().add(seriesEmg);
+                        emgPos = 2;
+                        break;
+                    case "Force":
+                        forceChart.getData().add(seriesForce);
+                        forcePos = 2;
+                        break;
+                    case "Resp":
+                        respChart.getData().add(seriesResp);
+                        respPos = 2;
+                        break;
+                    case "Temp":
+                        tempChart.getData().add(seriesTemp);
+                        tempPos = 2;
+                        break; 
+                    default:
+                        System.err.println("Error with the ComboBox");
+                }
+            }
+        });
+        comboBox4.valueProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                switch (newValue){
+                    case "ACC X":
+                        accChart.getData().add(seriesX);
+                        accXPos = 3;
+                        break;
+                    case "ACC Y":
+                        accChart.getData().add(seriesY);
+                        accYPos = 3;
+                        break;
+                    case "ACC Z":
+                        accChart.getData().add(seriesZ);
+                        accZPos = 3;
+                        break;
+                    case "ECG":
+                        ecgChart.getData().add(seriesEcg);
+                        ecgPos = 3;
+                        break;
+                    case "EDA":
+                        edaChart.getData().add(seriesEda);
+                        edaPos = 3;
+                        break;
+                    case "EEG":
+                        eegChart.getData().add(seriesEeg);
+                        eegPos = 3;
+                        break;
+                    case "EMG":
+                        emgChart.getData().add(seriesEmg);
+                        emgPos = 3;
+                        break;
+                    case "Force":
+                        forceChart.getData().add(seriesForce);
+                        forcePos = 3;
+                        break;
+                    case "Resp":
+                        respChart.getData().add(seriesResp);
+                        respPos = 3;
+                        break;
+                    case "Temp":
+                        tempChart.getData().add(seriesTemp);
+                        tempPos = 3;
+                        break; 
+                    default:
+                        System.err.println("Error with the ComboBox");
+                }
+            }
+        });
+        comboBox5.valueProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                switch (newValue){
+                    case "ACC X":
+                        accChart.getData().add(seriesX);
+                        accXPos = 4;
+                        break;
+                    case "ACC Y":
+                        accChart.getData().add(seriesY);
+                        accYPos = 4;
+                        break;
+                    case "ACC Z":
+                        accChart.getData().add(seriesZ);
+                        accZPos = 4;
+                        break;
+                    case "ECG":
+                        ecgChart.getData().add(seriesEcg);
+                        ecgPos = 4;
+                        break;
+                    case "EDA":
+                        edaChart.getData().add(seriesEda);
+                        edaPos = 4;
+                        break;
+                    case "EEG":
+                        eegChart.getData().add(seriesEeg);
+                        eegPos = 4;
+                        break;
+                    case "EMG":
+                        emgChart.getData().add(seriesEmg);
+                        emgPos = 4;
+                        break;
+                    case "Force":
+                        forceChart.getData().add(seriesForce);
+                        forcePos = 4;
+                        break;
+                    case "Resp":
+                        respChart.getData().add(seriesResp);
+                        respPos = 4;
+                        break;
+                    case "Temp":
+                        tempChart.getData().add(seriesTemp);
+                        tempPos = 4;
+                        break; 
+                    default:
+                        System.err.println("Error with the ComboBox");
+                }
+            }
+        });
+        comboBox6.valueProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                switch (newValue){
+                    case "ACC X":
+                        accChart.getData().add(seriesX);
+                        accXPos = 5;
+                        break;
+                    case "ACC Y":
+                        accChart.getData().add(seriesY);
+                        accYPos = 5;
+                        break;
+                    case "ACC Z":
+                        accChart.getData().add(seriesZ);
+                        accZPos = 5;
+                        break;
+                    case "ECG":
+                        ecgChart.getData().add(seriesEcg);
+                        ecgPos = 5;
+                        break;
+                    case "EDA":
+                        edaChart.getData().add(seriesEda);
+                        edaPos = 5;
+                        break;
+                    case "EEG":
+                        eegChart.getData().add(seriesEeg);
+                        eegPos = 5;
+                        break;
+                    case "EMG":
+                        emgChart.getData().add(seriesEmg);
+                        emgPos = 5;
+                        break;
+                    case "Force":
+                        forceChart.getData().add(seriesForce);
+                        forcePos = 5;
+                        break;
+                    case "Resp":
+                        respChart.getData().add(seriesResp);
+                        respPos = 5;
+                        break;
+                    case "Temp":
+                        tempChart.getData().add(seriesTemp);
+                        tempPos = 5;
+                        break; 
+                    default:
+                        System.err.println("Error with the ComboBox");
+                }
+            }
+        });
+        comboBox7.valueProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                switch (newValue){
+                    case "ACC X":
+                        accChart.getData().add(seriesX);
+                        accXPos = 6;
+                        break;
+                    case "ACC Y":
+                        accChart.getData().add(seriesY);
+                        accYPos = 6;
+                        break;
+                    case "ACC Z":
+                        accChart.getData().add(seriesZ);
+                        accZPos = 6;
+                        break;
+                    case "ECG":
+                        ecgChart.getData().add(seriesEcg);
+                        ecgPos = 6;
+                        break;
+                    case "EDA":
+                        edaChart.getData().add(seriesEda);
+                        edaPos = 6;
+                        break;
+                    case "EEG":
+                        eegChart.getData().add(seriesEeg);
+                        eegPos = 6;
+                        break;
+                    case "EMG":
+                        emgChart.getData().add(seriesEmg);
+                        emgPos = 6;
+                        break;
+                    case "Force":
+                        forceChart.getData().add(seriesForce);
+                        forcePos = 6;
+                        break;
+                    case "Resp":
+                        respChart.getData().add(seriesResp);
+                        respPos = 6;
+                        break;
+                    case "Temp":
+                        tempChart.getData().add(seriesTemp);
+                        tempPos = 6;
+                        break; 
+                    default:
+                        System.err.println("Error with the ComboBox");
+                }
+            }
+        });
+        comboBox8.valueProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                switch (newValue){
+                    case "ACC X":
+                        accChart.getData().add(seriesX);
+                        accXPos = 7;
+                        break;
+                    case "ACC Y":
+                        accChart.getData().add(seriesY);
+                        accYPos = 7;
+                        break;
+                    case "ACC Z":
+                        accChart.getData().add(seriesZ);
+                        accZPos = 7;
+                        break;
+                    case "ECG":
+                        ecgChart.getData().add(seriesEcg);
+                        ecgPos = 7;
+                        break;
+                    case "EDA":
+                        edaChart.getData().add(seriesEda);
+                        edaPos = 7;
+                        break;
+                    case "EEG":
+                        eegChart.getData().add(seriesEeg);
+                        eegPos = 7;
+                        break;
+                    case "EMG":
+                        emgChart.getData().add(seriesEmg);
+                        emgPos = 7;
+                        break;
+                    case "Force":
+                        forceChart.getData().add(seriesForce);
+                        forcePos = 7;
+                        break;
+                    case "Resp":
+                        respChart.getData().add(seriesResp);
+                        respPos = 7;
+                        break;
+                    case "Temp":
+                        tempChart.getData().add(seriesTemp);
+                        tempPos = 7;
+                        break; 
+                    default:
+                        System.err.println("Error with the ComboBox");
+                }
+            }
+        });
+        
         try {
-       
             Vector devs = new Vector();
             Device.FindDevices(devs);
             
@@ -147,15 +582,18 @@ public class RealtimeFXMLController implements Initializable {
             System.out.println("Exception: " + err + " - " + err.getMessage());
         }         
         
-        Timeline updateGraphs = new Timeline(new KeyFrame(Duration.seconds(1), new EventHandler<ActionEvent>() {
+        updateGraphs = new Timeline(new KeyFrame(Duration.millis(1000), new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                System.out.println("-------------- UPDATE GRAPH ------------------");
                 try {
+                    System.out.println("Frames before: " + frames);
                     dev.GetFrames(1000, frames); 
-                 
-                    if (seriesZ.getData().size() >= 10){
-//                        seriesX.getData().remove(0);
-//                        seriesY.getData().remove(0);
+                    System.out.println("Frames after: " + frames);
+                    System.out.println("seriesTemp.size: " + seriesTemp.getData().size());
+                    if (seriesTemp.getData().size() >= 10){
+                        seriesX.getData().remove(0);
+                        seriesY.getData().remove(0);
                         seriesZ.getData().remove(0);
                         seriesTemp.getData().remove(0);
                         seriesEcg.getData().remove(0);
@@ -168,16 +606,16 @@ public class RealtimeFXMLController implements Initializable {
                     
                     Device.Frame data = frames[0];
 
-//                    seriesX.getData().add(new XYChart.Data<>(signalsCounter + "", transAcc(data.an_in[0])));
-                    seriesEeg.getData().add(new XYChart.Data<>(signalsCounter + "", transEeg(data.an_in[1])));
-//                    seriesY.getData().add(new XYChart.Data<>(signalsCounter + "", transAcc(data.an_in[1])));
-                    seriesEcg.getData().add(new XYChart.Data<>(signalsCounter + "", transEcg(data.an_in[0])));
-                    seriesZ.getData().add(new XYChart.Data<>(signalsCounter + "", transAcc(data.an_in[2])));
-                    seriesTemp.getData().add(new XYChart.Data<>(signalsCounter + "", transTemp(data.an_in[3])));
-                    seriesResp.getData().add(new XYChart.Data<>(signalsCounter + "", transResp(data.an_in[4])));
-                    seriesForce.getData().add(new XYChart.Data<>(signalsCounter + "", data.an_in[5]));
-                    seriesEmg.getData().add(new XYChart.Data<>(signalsCounter + "", transEmg(data.an_in[6])));
-                    seriesEda.getData().add(new XYChart.Data<>(signalsCounter + "", transEda(data.an_in[7])));
+                    seriesX.getData().add(new XYChart.Data<>(signalsCounter + "", transAcc(data.an_in[accXPos])));
+                    seriesEeg.getData().add(new XYChart.Data<>(signalsCounter + "", transEeg(data.an_in[eegPos])));
+                    seriesY.getData().add(new XYChart.Data<>(signalsCounter + "", transAcc(data.an_in[accYPos])));
+                    seriesEcg.getData().add(new XYChart.Data<>(signalsCounter + "", transEcg(data.an_in[ecgPos])));
+                    seriesZ.getData().add(new XYChart.Data<>(signalsCounter + "", transAcc(data.an_in[accZPos])));
+                    seriesTemp.getData().add(new XYChart.Data<>(signalsCounter + "", transTemp(data.an_in[tempPos])));
+                    seriesResp.getData().add(new XYChart.Data<>(signalsCounter + "", transResp(data.an_in[respPos])));
+                    seriesForce.getData().add(new XYChart.Data<>(signalsCounter + "", data.an_in[forcePos]));
+                    seriesEmg.getData().add(new XYChart.Data<>(signalsCounter + "", transEmg(data.an_in[emgPos])));
+                    seriesEda.getData().add(new XYChart.Data<>(signalsCounter + "", transEda(data.an_in[edaPos])));
                             
                     signalsCounter++;
                         
@@ -187,7 +625,7 @@ public class RealtimeFXMLController implements Initializable {
             }
         }));
         updateGraphs.setCycleCount(Timeline.INDEFINITE);
-        updateGraphs.play(); 
+        
 
 
         /*      SETUP CAMERA VIDEO STREAM     */
@@ -202,7 +640,7 @@ public class RealtimeFXMLController implements Initializable {
             Logger.getLogger(RealtimeFXMLController.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        Thread t = new Thread(() -> {
+        cameraThread = new Thread(() -> {
             Frame capturedFrame = null;
             try {
                 while((capturedFrame = grabber.grab()) != null){
@@ -214,20 +652,23 @@ public class RealtimeFXMLController implements Initializable {
             }
         });
 
-        t.setDaemon(true);
-        t.start();
+        cameraThread.setDaemon(true);
+        cameraThread.start();
+        updateGraphs.play(); 
 
+    }
+    
+    @FXML
+    private void startRealtime(ActionEvent event) {
+        
     }
     
     private double transTemp(int rawData){
         double ntcV = rawData*VCC/POW_2_N;
         double ntcO = 10000*ntcV/(VCC-ntcV);
-
         double logO = Math.log(ntcO);
-
         double tempK = 1/(A0+(A1*logO)+(A2*Math.pow(logO,3)));
-        double tempC = tempK-KELVIN_CELSIUS;
-        
+        double tempC = tempK-KELVIN_CELSIUS;      
         return tempC;
     }
     
@@ -261,8 +702,6 @@ public class RealtimeFXMLController implements Initializable {
     private double transEeg(int rawData){
         double eegV = (((rawData/POW_2_N)-0.5)*VCC)/EEG_GAIN;
         double eegMV = eegV*1000000;
-        System.out.println("rawData: " + rawData);
-        System.out.println("EEG(mV): " + eegMV);
         return eegMV;
     }
     
