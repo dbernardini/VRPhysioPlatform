@@ -2,6 +2,8 @@
 package com.bernardini.vrphysioplatform;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Vector;
@@ -95,6 +97,7 @@ public class RealtimeFXMLController implements Initializable {
     private Device.Frame[] frames;
     private OpenCVFrameGrabber grabber;
     private Thread cameraThread;
+    private Thread sensorsThread;
     private Timeline updateGraphs;
     
     private int accXPos;
@@ -167,6 +170,15 @@ public class RealtimeFXMLController implements Initializable {
         comboBox6.setItems(SENSORS);
         comboBox7.setItems(SENSORS);
         comboBox8.setItems(SENSORS);
+        
+        tempChart.setCreateSymbols(false);
+        ecgChart.setCreateSymbols(false);
+        emgChart.setCreateSymbols(false);
+        forceChart.setCreateSymbols(false);            
+        edaChart.setCreateSymbols(false);
+        respChart.setCreateSymbols(false);
+        eegChart.setCreateSymbols(false);
+        accChart.setCreateSymbols(false);
    
         comboBox1.valueProperty().addListener(new ChangeListener<String>() {
             @Override
@@ -575,22 +587,35 @@ public class RealtimeFXMLController implements Initializable {
             for (int i = 0; i < 1000; i++)
                frames[i] = new Device.Frame();
 
-            dev.BeginAcq(1000, 0xFF, N_BITS); // 1000 Hz, 8 channels, 16 bits
+            dev.BeginAcq(1000, 0xFF, N_BITS); // 100 Hz, 8 channels, 16 bits
 
         }
         catch (BPException err){
             System.out.println("Exception: " + err + " - " + err.getMessage());
-        }         
+        }    
         
-        updateGraphs = new Timeline(new KeyFrame(Duration.millis(1000), new EventHandler<ActionEvent>() {
+        sensorsThread = new Thread(() -> {
+            while(true){
+                try {
+                    dev.GetFrames(100, frames);
+                    System.out.println("getFrames");
+                    System.out.println("frames[0]: " + frames[0].an_in[1]);
+                    Thread.sleep(100);
+                } catch (BPException ex) {
+                    Logger.getLogger(RealtimeFXMLController.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(RealtimeFXMLController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+        sensorsThread.setDaemon(true);
+        sensorsThread.start();
+        
+        
+        updateGraphs = new Timeline(new KeyFrame(Duration.millis(100), new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                System.out.println("-------------- UPDATE GRAPH ------------------");
                 try {
-                    System.out.println("Frames before: " + frames);
-                    dev.GetFrames(1000, frames); 
-                    System.out.println("Frames after: " + frames);
-                    System.out.println("seriesTemp.size: " + seriesTemp.getData().size());
                     if (seriesTemp.getData().size() >= 10){
                         seriesX.getData().remove(0);
                         seriesY.getData().remove(0);
@@ -605,27 +630,29 @@ public class RealtimeFXMLController implements Initializable {
                     }
                     
                     Device.Frame data = frames[0];
+                    
+                    double temp = round(transTemp(data.an_in[tempPos]),1);
 
                     seriesX.getData().add(new XYChart.Data<>(signalsCounter + "", transAcc(data.an_in[accXPos])));
                     seriesEeg.getData().add(new XYChart.Data<>(signalsCounter + "", transEeg(data.an_in[eegPos])));
                     seriesY.getData().add(new XYChart.Data<>(signalsCounter + "", transAcc(data.an_in[accYPos])));
                     seriesEcg.getData().add(new XYChart.Data<>(signalsCounter + "", transEcg(data.an_in[ecgPos])));
                     seriesZ.getData().add(new XYChart.Data<>(signalsCounter + "", transAcc(data.an_in[accZPos])));
-                    seriesTemp.getData().add(new XYChart.Data<>(signalsCounter + "", transTemp(data.an_in[tempPos])));
+                    seriesTemp.getData().add(new XYChart.Data<>(signalsCounter + "", temp));
                     seriesResp.getData().add(new XYChart.Data<>(signalsCounter + "", transResp(data.an_in[respPos])));
-                    seriesForce.getData().add(new XYChart.Data<>(signalsCounter + "", data.an_in[forcePos]));
+                    seriesForce.getData().add(new XYChart.Data<>(signalsCounter + "", transForce(data.an_in[forcePos])));
                     seriesEmg.getData().add(new XYChart.Data<>(signalsCounter + "", transEmg(data.an_in[emgPos])));
                     seriesEda.getData().add(new XYChart.Data<>(signalsCounter + "", transEda(data.an_in[edaPos])));
                             
                     signalsCounter++;
                         
-                } catch (BPException ex) {
+                } catch (Exception ex) {
                     Logger.getLogger(RealtimeFXMLController.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }));
         updateGraphs.setCycleCount(Timeline.INDEFINITE);
-        
+        updateGraphs.play(); 
 
 
         /*      SETUP CAMERA VIDEO STREAM     */
@@ -654,7 +681,6 @@ public class RealtimeFXMLController implements Initializable {
 
         cameraThread.setDaemon(true);
         cameraThread.start();
-        updateGraphs.play(); 
 
     }
     
@@ -703,6 +729,19 @@ public class RealtimeFXMLController implements Initializable {
         double eegV = (((rawData/POW_2_N)-0.5)*VCC)/EEG_GAIN;
         double eegMV = eegV*1000000;
         return eegMV;
+    }
+    
+    private double transForce(int rawData){
+        double force = rawData*100/POW_2_N;
+        return force;
+    }
+    
+    private static double round(double value, int places) {
+        if (places < 0) 
+            throw new IllegalArgumentException();
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
     
     protected void stopAcquisitions(){

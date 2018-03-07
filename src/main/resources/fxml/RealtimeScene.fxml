@@ -54,9 +54,8 @@
                      <children>
                         <GridPane HBox.hgrow="ALWAYS">
                           <columnConstraints>
-                            <ColumnConstraints hgrow="NEVER" />
-                            <ColumnConstraints hgrow="NEVER" />
-                              <ColumnConstraints hgrow="ALWAYS" />
+                            <ColumnConstraints hgrow="ALWAYS" />
+                            <ColumnConstraints hgrow="ALWAYS" />
                           </columnConstraints>
                           <rowConstraints>
                               <RowConstraints valignment="CENTER" vgrow="NEVER" />
@@ -114,7 +113,6 @@
                                     <Insets bottom="20.0" left="10.0" right="10.0" top="20.0" />
                                  </GridPane.margin>
                               </Label>
-                              <Button fx:id="startButton" mnemonicParsing="false" onAction="#startRealtime" text="START" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowSpan="5" GridPane.valignment="CENTER" />
                            </children>
                            <HBox.margin>
                               <Insets bottom="10.0" left="30.0" right="30.0" top="10.0" />
@@ -145,15 +143,15 @@
                <children>
                   <LineChart fx:id="forceChart" animated="false" maxHeight="50.0" title="Force" GridPane.rowIndex="1">
                     <xAxis>
-                      <CategoryAxis side="BOTTOM" />
+                      <CategoryAxis side="BOTTOM" tickLabelsVisible="false" tickMarkVisible="false" />
                     </xAxis>
                     <yAxis>
-                      <NumberAxis fx:id="numberAxis00" forceZeroInRange="false" label="Raw" side="LEFT" />
+                      <NumberAxis fx:id="numberAxis00" autoRanging="false" forceZeroInRange="false" label="\%" side="LEFT" />
                     </yAxis>
                   </LineChart>
                   <LineChart fx:id="tempChart" animated="false" maxHeight="50.0" title="Temperature" GridPane.columnIndex="1" GridPane.rowIndex="1">
                      <xAxis>
-                        <CategoryAxis side="BOTTOM" />
+                        <CategoryAxis side="BOTTOM" tickLabelsVisible="false" tickMarkVisible="false" />
                      </xAxis>
                      <yAxis>
                         <NumberAxis forceZeroInRange="false" label="°C" side="LEFT" />
@@ -161,7 +159,7 @@
                   </LineChart>
                   <LineChart fx:id="edaChart" animated="false" maxHeight="50.0" title="EDA" GridPane.rowIndex="2">
                      <xAxis>
-                        <CategoryAxis side="BOTTOM" />
+                        <CategoryAxis side="BOTTOM" tickLabelsVisible="false" tickMarkVisible="false" />
                      </xAxis>
                      <yAxis>
                         <NumberAxis forceZeroInRange="false" label="μS" side="LEFT" />
@@ -169,7 +167,7 @@
                   </LineChart>
                   <LineChart fx:id="respChart" animated="false" maxHeight="50.0" title="Respiration" GridPane.columnIndex="1" GridPane.rowIndex="2">
                      <xAxis>
-                        <CategoryAxis side="BOTTOM" />
+                        <CategoryAxis side="BOTTOM" tickLabelsVisible="false" tickMarkVisible="false" />
                      </xAxis>
                      <yAxis>
                         <NumberAxis forceZeroInRange="false" label="\%" side="LEFT" />
@@ -177,7 +175,7 @@
                   </LineChart>
                   <LineChart fx:id="eegChart" animated="false" maxHeight="50.0" title="EEG" GridPane.rowIndex="3">
                      <xAxis>
-                        <CategoryAxis side="BOTTOM" />
+                        <CategoryAxis side="BOTTOM" tickLabelsVisible="false" tickMarkVisible="false" />
                      </xAxis>
                      <yAxis>
                         <NumberAxis forceZeroInRange="false" label="μV" side="LEFT" />
@@ -185,23 +183,23 @@
                   </LineChart>
                   <LineChart fx:id="accChart" animated="false" legendSide="RIGHT" maxHeight="50.0" title="Accelerometer" GridPane.columnIndex="1" GridPane.rowIndex="3">
                      <xAxis>
-                        <CategoryAxis side="BOTTOM" />
+                        <CategoryAxis side="BOTTOM" tickLabelsVisible="false" tickMarkVisible="false" />
                      </xAxis>
                      <yAxis>
-                        <NumberAxis autoRanging="false" forceZeroInRange="false" label="g" lowerBound="-1.0" side="LEFT" upperBound="1.0" />
+                        <NumberAxis autoRanging="false" forceZeroInRange="false" label="g" lowerBound="-1.5" side="LEFT" upperBound="1.5" />
                      </yAxis>
                   </LineChart>
                   <LineChart fx:id="ecgChart" animated="false" maxHeight="50.0" title="ECG">
                      <xAxis>
-                        <CategoryAxis side="BOTTOM" />
+                        <CategoryAxis side="BOTTOM" tickLabelsVisible="false" tickMarkVisible="false" />
                      </xAxis>
                      <yAxis>
-                        <NumberAxis forceZeroInRange="false" label="mV" side="LEFT" />
+                        <NumberAxis autoRanging="false" forceZeroInRange="false" label="mV" lowerBound="-2.0" side="LEFT" upperBound="2.0" />
                      </yAxis>
                   </LineChart>
                   <LineChart fx:id="emgChart" animated="false" maxHeight="50.0" title="EMG" GridPane.columnIndex="1">
                      <xAxis>
-                        <CategoryAxis side="BOTTOM" />
+                        <CategoryAxis side="BOTTOM" tickLabelsVisible="false" tickMarkVisible="false" />
                      </xAxis>
                      <yAxis>
                         <NumberAxis forceZeroInRange="false" label="mV" side="LEFT" />
@@ -211,22 +209,22 @@
             </GridPane>
             <HBox alignment="CENTER">
                <children>
-                  <Button fx:id="playAll" mnemonicParsing="false" text="Play all">
+                  <Button fx:id="playAll" mnemonicParsing="false" text="Play all" visible="false">
                      <HBox.margin>
                         <Insets right="5.0" />
                      </HBox.margin>
                   </Button>
-                  <Button fx:id="pauseAll" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" text="Pause all">
+                  <Button fx:id="pauseAll" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" text="Pause all" visible="false">
                      <HBox.margin>
                         <Insets right="5.0" />
                      </HBox.margin>
                   </Button>
-                  <Button fx:id="stopAll" layoutX="63.0" layoutY="10.0" mnemonicParsing="false" text="Stop all">
+                  <Button fx:id="stopAll" layoutX="63.0" layoutY="10.0" mnemonicParsing="false" text="Stop all" visible="false">
                      <HBox.margin>
                         <Insets right="5.0" />
                      </HBox.margin>
                   </Button>
-                  <Button fx:id="insertMark" mnemonicParsing="false" text="Insert marker">
+                  <Button fx:id="insertMark" mnemonicParsing="false" text="Insert marker" visible="false">
                      <HBox.margin>
                         <Insets left="20.0" right="5.0" />
                      </HBox.margin>
